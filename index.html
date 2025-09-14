@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Текстовый Чат</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .user-section {
+            padding: 15px 20px;
+            background-color: #f5f7ff;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .username-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .username-input:focus {
+            border-color: #6e8efb;
+        }
+        
+        .message-input-section {
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .message-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            resize: none;
+            height: 45px;
+            transition: border-color 0.3s;
+        }
+        
+        .message-input:focus {
+            border-color: #6e8efb;
+        }
+        
+        .send-btn {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            border: none;
+            color: white;
+            margin-left: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .send-btn:disabled {
+            background: linear-gradient(90deg, #cccccc, #999999);
+            cursor: not-allowed;
+        }
+        
+        .send-btn:not(:disabled):hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .messages-section {
+            padding: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            border-top: 1px solid #e0e0e0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .message {
+            display: flex;
+            margin-bottom: 15px;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .message.own {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #6e8efb, #a777e3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            margin: 0 10px;
+            flex-shrink: 0;
+        }
+        
+        .message-content {
+            flex: 1;
+            background-color: #f0f4ff;
+            padding: 12px;
+            border-radius: 18px;
+            position: relative;
+            max-width: 70%;
+        }
+        
+        .message.own .message-content {
+            background-color: #e6eeff;
+        }
+        
+        .message-username {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #6e8efb;
+        }
+        
+        .message-text {
+            word-wrap: break-word;
+            line-height: 1.4;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #888;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .no-messages {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+        }
+        
+        .footer {
+            padding: 15px;
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+        }
+        
+        /* Адаптивность для мобильных устройств */
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .messages-section {
+                max-height: 250px;
+            }
+        }
+        
+        /* Стили для скроллбара */
+        .messages-section::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .messages-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        .messages-section::-webkit-scrollbar-thumb {
+            background: #a777e3;
+            border-radius: 10px;
+        }
+        
+        .messages-section::-webkit-scrollbar-thumb:hover {
+            background: #6e8efb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Текстовый Чат</h1>
+            <p>Общайтесь в реальном времени</p>
+        </div>
+        
+        <div class="user-section">
+            <div class="user-avatar" id="user-avatar">U</div>
+            <input type="text" class="username-input" id="username-input" placeholder="Введите ваше имя" maxlength="20">
+        </div>
+        
+        <div class="messages-section" id="messages-container">
+            <div class="no-messages" id="no-messages">Нет сообщений</div>
+        </div>
+        
+        <div class="message-input-section">
+            <textarea class="message-input" id="message-input" placeholder="Введите сообщение..." maxlength="500"></textarea>
+            <button class="send-btn" id="send-btn" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="footer">
+            Сообщения удаляются через 3 минуты, пользователи - через 7 минут неактивности
+        </div>
+    </div>
+
+    <!-- Firebase App (основа Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
+    <script>
+        // Ваша конфигурация Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyB2WvLmjgcv1YDwLRsVj6qAwbjMqG1hbKY",
+            authDomain: "bindr-cac29.firebaseapp.com",
+            databaseURL: "https://bindr-cac29-default-rtdb.firebaseio.com",
+            projectId: "bindr-cac29",
+            storageBucket: "bindr-cac29.firebasestorage.app",
+            messagingSenderId: "888959223947",
+            appId: "1:888959223947:web:c7e829c917354c9594ac8e"
+        };
+
+        // Инициализация Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Элементы DOM
+        const usernameInput = document.getElementById('username-input');
+        const userAvatar = document.getElementById('user-avatar');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const messagesContainer = document.getElementById('messages-container');
+        const noMessages = document.getElementById('no-messages');
+
+        // Переменные состояния
+        let currentUsername = '';
+        let userId = generateUserId();
+        let lastActivityTime = Date.now();
+
+        // Генерация уникального ID пользователя
+        function generateUserId() {
+            return 'user_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Обновление времени последней активности
+        function updateLastActivity() {
+            lastActivityTime = Date.now();
+            if (currentUsername) {
+                database.ref('users/' + userId).set({
+                    username: currentUsername,
+                    lastActivity: lastActivityTime
+                });
+            }
+        }
+
+        // Установка имени пользователя
+        usernameInput.addEventListener('change', () => {
+            const username = usernameInput.value.trim();
+            if (username) {
+                currentUsername = username;
+                userAvatar.textContent = username.charAt(0).toUpperCase();
+                updateLastActivity();
+                
+                // Периодическая проверка активности пользователей
+                setInterval(() => {
+                    database.ref('users').once('value', (snapshot) => {
+                        const users = snapshot.val();
+                        const now = Date.now();
+                        
+                        if (users) {
+                            for (let id in users) {
+                                if (now - users[id].lastActivity > 7 * 60 * 1000) {
+                                    database.ref('users/' + id).remove();
+                                }
+                            }
+                        }
+                    });
+                }, 60000); // Проверка каждую минуту
+            }
+        });
+
+        // Активация кнопки отправки при вводе текста
+        messageInput.addEventListener('input', () => {
+            sendBtn.disabled = messageInput.value.trim() === '' || !currentUsername;
+        });
+
+        // Отправка сообщения
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function sendMessage() {
+            if (!currentUsername) {
+                alert('Пожалуйста, введите имя пользователя');
+                return;
+            }
+            
+            const messageText = messageInput.value.trim();
+            if (messageText) {
+                // Сохранение информации о сообщении в базе данных
+                database.ref('messages').push({
+                    userId: userId,
+                    username: currentUsername,
+                    text: messageText,
+                    timestamp: Date.now()
+                });
+                
+                // Очистка поля ввода
+                messageInput.value = '';
+                sendBtn.disabled = true;
+                
+                // Обновление активности
+                updateLastActivity();
+            }
+        }
+
+        // Отображение сообщений
+        database.ref('messages').on('child_added', (snapshot) => {
+            const message = snapshot.val();
+            noMessages.style.display = 'none';
+            
+            // Создание элемента сообщения
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+            messageElement.setAttribute('data-id', snapshot.key);
+            if (message.userId === userId) {
+                messageElement.classList.add('own');
+            }
+            
+            // Форматирование времени
+            const messageTime = new Date(message.timestamp);
+            const timeString = messageTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageElement.innerHTML = `
+                <div class="message-avatar">${message.username.charAt(0).toUpperCase()}</div>
+                <div class="message-content">
+                    <div class="message-username">${message.username}</div>
+                    <div class="message-text">${message.text}</div>
+                    <div class="message-time">${timeString}</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Установка таймера для удаления сообщения через 3 минуты
+            setTimeout(() => {
+                // Удаление из базы данных
+                snapshot.ref.remove();
+            }, 3 * 60 * 1000); // 3 минуты
+        });
+
+        // Удаление сообщений из интерфейса при удалении из базы
+        database.ref('messages').on('child_removed', (snapshot) => {
+            const messageId = snapshot.key;
+            const messageElement = document.querySelector(`[data-id="${messageId}"]`);
+            if (messageElement) {
+                messageElement.remove();
+            }
+            
+            // Показать "Нет сообщений", если все удалены
+            if (messagesContainer.children.length === 1) {
+                noMessages.style.display = 'block';
+            }
+        });
+
+        // Обновление активности при взаимодействии с интерфейсом
+        document.addEventListener('click', updateLastActivity);
+        document.addEventListener('keydown', updateLastActivity);
+        
+        // Загрузка существующих сообщений при подключении
+        database.ref('messages').once('value', (snapshot) => {
+            if (snapshot.exists()) {
+                noMessages.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
