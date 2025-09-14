@@ -275,7 +275,7 @@
         </div>
         
         <div class="footer">
-            Сообщения удаляются через 3 минуты, пользователи - через 7 минут неактивности
+            Сообщения удаляются через 3 минуты, пользователи - через 3 минуты неактивности
         </div>
     </div>
 
@@ -337,7 +337,7 @@
                 userAvatar.textContent = username.charAt(0).toUpperCase();
                 updateLastActivity();
                 
-                // Периодическая проверка активности пользователей
+                // Периодическая проверка активности пользователей (каждые 30 секунд)
                 setInterval(() => {
                     database.ref('users').once('value', (snapshot) => {
                         const users = snapshot.val();
@@ -345,13 +345,13 @@
                         
                         if (users) {
                             for (let id in users) {
-                                if (now - users[id].lastActivity > 7 * 60 * 1000) {
+                                if (now - users[id].lastActivity > 3 * 60 * 1000) {
                                     database.ref('users/' + id).remove();
                                 }
                             }
                         }
                     });
-                }, 60000); // Проверка каждую минуту
+                }, 30000); // Проверка каждые 30 секунд
             }
         });
 
@@ -454,6 +454,35 @@
                 noMessages.style.display = 'none';
             }
         });
+
+        // Очистка старых сообщений при загрузке (на случай если какие-то остались)
+        setTimeout(() => {
+            database.ref('messages').once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const messages = snapshot.val();
+                    const now = Date.now();
+                    
+                    for (let id in messages) {
+                        if (now - messages[id].timestamp > 3 * 60 * 1000) {
+                            database.ref('messages/' + id).remove();
+                        }
+                    }
+                }
+            });
+
+            database.ref('users').once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const users = snapshot.val();
+                    const now = Date.now();
+                    
+                    for (let id in users) {
+                        if (now - users[id].lastActivity > 3 * 60 * 1000) {
+                            database.ref('users/' + id).remove();
+                        }
+                    }
+                }
+            });
+        }, 1000);
     </script>
 </body>
 </html>
